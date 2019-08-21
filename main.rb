@@ -16,24 +16,28 @@ def read_sms_irradiance_log(filename)
   end
 end
 
-# Batch 1, offset 0
+irradiance_column_header = "Irradiance (Wh/m2)"
+normalized_irradiance_column_header = "Irradiance/100"
 
-csv_list = Dir["./data/**/*.csv"]
-
-csv_list.each do |filename|
+Dir["./data/**/*.csv"].each do |filename|
   File.open(filename) do |multimeter_logs|
     multimeter_logs.gets
     table = CSV.new(multimeter_logs, headers: true).read
-    if irradiance = read_sms_irradiance_log(filename.sub(".csv", ".sms"))
-      CSV.open(filename.sub("data", "output"), "w") do |collated_logs|
-        collated_logs << table.headers  + ["Irradiance"]
-        table.each_with_index do |row, i|
-          next unless row["Irradiance"] = irradiance[i] && irradiance[i].last
-          row["Time"] = row["Time"].sub("0day", "")
-          collated_logs << row
+    irradiance = read_sms_irradiance_log(filename.sub(".csv", ".sms"))
+
+    CSV.open(filename.sub("data", "output"), "w") do |collated_logs|
+      new_log_headers = irradiance ? table.headers + [irradiance_column_header, normalized_irradiance_column_header] : table.headers
+      collated_logs << new_log_headers
+      table.each_with_index do |row, i|
+        if irradiance
+          next unless irradiance[i]
+          row[irradiance_column_header] = irradiance[i].last
+          row[normalized_irradiance_column_header] = irradiance[i].last.to_f / 100.0
         end
-      end      
-    end
+        row["Time"] = row["Time"].sub("0day", "")
+        collated_logs << row
+      end
+    end  
   end
 end
 
