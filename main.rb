@@ -29,6 +29,7 @@ csv_list.each do |filename|
         collated_logs << table.headers  + ["Irradiance"]
         table.each_with_index do |row, i|
           next unless row["Irradiance"] = irradiance[i] && irradiance[i].last
+          row["Time"] = row["Time"].sub("0day", "")
           collated_logs << row
         end
       end      
