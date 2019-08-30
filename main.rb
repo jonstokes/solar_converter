@@ -16,7 +16,7 @@ def read_sms_irradiance_log(filename)
   end
 end
 
-irradiance_column_header = "Irradiance (Wh/m2)"
+irradiance_column_header = "Irradiance (W/m2)"
 normalized_irradiance_column_header = "Irradiance/100"
 
 Dir["./data/**/*.csv"].each do |filename|
