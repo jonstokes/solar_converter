@@ -2,6 +2,8 @@ require 'csv'
 require 'pry'
 require 'yaml'
 
+@panel_data = YAML.load_file('./data/panel_stats.yml')
+
 # Common functions
 def read_sms_irradiance_log(filename)
   begin
@@ -17,12 +19,20 @@ def read_sms_irradiance_log(filename)
   end
 end
 
+def calculate_panel_efficiency(power_output, irradiance_value, panel_name)
+  area = @panel_data[panel_name]["area"]
+
+  irradiance_on_panel = irradiance_value * area
+
+  puts "#{panel_name}: #{irradiance_value}(W/m2) * #{area}(m2) = #{irradiance_on_panel} | #{power_output}"
+
+  ((power_output / irradiance_on_panel) * 100.00).round(2)
+end
+
 irradiance_column_header = "Irradiance(W/m2)"
 normalized_irradiance_column_header = "Irradiance/100"
 power_column_header = "Power(W)"
 efficiency_column_header = "Efficiency(%)"
-
-panel_data = YAML.load_file('./data/panel_stats.yml')
 
 Dir["./data/**/*.csv"].each do |filename|
   File.open(filename) do |multimeter_logs|
@@ -31,6 +41,7 @@ Dir["./data/**/*.csv"].each do |filename|
     irradiance = read_sms_irradiance_log(filename.sub(".csv", ".sms"))
 
     CSV.open(filename.sub("data", "output"), "w") do |collated_logs|
+      panel_name = filename.split("/").last.split("-").first
       new_log_headers = irradiance ? table.headers + [irradiance_column_header, normalized_irradiance_column_header] : table.headers
       new_log_headers += [power_column_header, efficiency_column_header]
       collated_logs << new_log_headers
@@ -40,7 +51,11 @@ Dir["./data/**/*.csv"].each do |filename|
           row[irradiance_column_header] = irrad_val
           row[normalized_irradiance_column_header] = (irrad_val.to_f / 100.0).round(3)
           row[power_column_header] = (row["Current(A)"].to_f * row["Voltage(V)"].to_f).round(2)
-          row[efficiency_column_header] = ((row[power_column_header] / irrad_val.to_f) * 100.00).round(2)
+          row[efficiency_column_header] = calculate_panel_efficiency(
+            row[power_column_header],
+            irrad_val.to_f,
+            panel_name
+          )
         end
         row["Time"] = row["Time"].sub("0day", "")
         collated_logs << row
