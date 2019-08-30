@@ -1,5 +1,6 @@
 require 'csv'
 require 'pry'
+require 'yaml'
 
 # Common functions
 def read_sms_irradiance_log(filename)
@@ -18,6 +19,8 @@ end
 
 irradiance_column_header = "Irradiance (W/m2)"
 normalized_irradiance_column_header = "Irradiance/100"
+
+panel_data = YAML.load_file('./data/panel_stats.yml')
 
 Dir["./data/**/*.csv"].each do |filename|
   File.open(filename) do |multimeter_logs|

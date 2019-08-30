@@ -1,0 +1,24 @@
+'big-blue':
+  area: 1.75
+  weight: 1.23
+  price: 60.00
+foxelli:
+  area: 1.01
+  weight: 1.10
+  price: 40.00
+nekteck:
+  area: 1.29
+  weight: 1.12
+  price: 40.00
+xdragon:
+  area: 1.07
+  weight: 0.94
+  price: 40.00
+aeiusny:
+  weight: 1.86
+  area: 1.65
+  price: 50
+choetech:
+  weight: 1.06
+  area: 1.22
+  price: 56.00
