@@ -1,4 +1,4 @@
-Time,Voltage(V),Current(A),Energy(Wh),Capacity(Ah),Energy Proportion(%),Capacity Proportion(%),Power(W),Efficiency(%)
+Time,Voltage(V),Current(A),Energy(Wh),Capacity(Ah),Energy Proportion(%),Capacity Proportion(%),Power(W),Efficiency(%),Power Score,Sun Score,Efficiency Score
 00:00:00,4.6950,1.9888,0.0259,0.0055,0.12,0.11
 00:00:10,4.7020,1.9887,0.0519,0.0110,0.25,0.22
 00:00:20,4.7070,1.9894,0.0779,0.0166,0.37,0.34
