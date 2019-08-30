@@ -17,8 +17,10 @@ def read_sms_irradiance_log(filename)
   end
 end
 
-irradiance_column_header = "Irradiance (W/m2)"
+irradiance_column_header = "Irradiance(W/m2)"
 normalized_irradiance_column_header = "Irradiance/100"
+power_column_header = "Power(W)"
+efficiency_column_header = "Efficiency(%)"
 
 panel_data = YAML.load_file('./data/panel_stats.yml')
 
@@ -30,12 +32,15 @@ Dir["./data/**/*.csv"].each do |filename|
 
     CSV.open(filename.sub("data", "output"), "w") do |collated_logs|
       new_log_headers = irradiance ? table.headers + [irradiance_column_header, normalized_irradiance_column_header] : table.headers
+      new_log_headers += [power_column_header, efficiency_column_header]
       collated_logs << new_log_headers
       table.each_with_index do |row, i|
         if irradiance
-          next unless irradiance[i]
-          row[irradiance_column_header] = irradiance[i].last
-          row[normalized_irradiance_column_header] = irradiance[i].last.to_f / 100.0
+          next unless irrad_val = irradiance[i] && irradiance[i].last
+          row[irradiance_column_header] = irrad_val
+          row[normalized_irradiance_column_header] = (irrad_val.to_f / 100.0).round(3)
+          row[power_column_header] = (row["Current(A)"].to_f * row["Voltage(V)"].to_f).round(2)
+          row[efficiency_column_header] = ((row[power_column_header] / irrad_val.to_f) * 100.00).round(2)
         end
         row["Time"] = row["Time"].sub("0day", "")
         collated_logs << row
