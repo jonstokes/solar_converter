@@ -2,7 +2,7 @@ bigblue:
   area: 1.75
   weight: 1.23
   price: 60.00
-  pmax: 9
+  pmax: 12
 foxelli:
   area: 1.01
   weight: 1.10
@@ -27,7 +27,7 @@ choetech:
   weight: 1.06
   area: 1.22
   price: 56.00
-  pmax: 8
+  pmax: 15
 gznomad7:
   weight: 1.0
   area: 0.74
@@ -51,7 +51,7 @@ solarcamp:
 rynotuff:
   weight: 1.04
   area: 1.2
-  pmax: 10
+  pmax: 12
   price: 45.00
 gznomad14:
   weight: 1.8

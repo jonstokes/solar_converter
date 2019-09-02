@@ -33,7 +33,7 @@ class PanelStats
     def initialize(row:, panel_name:, irradiance:)
       @row = row
       @panel_name = panel_name
-      @row[COLUMN_HEADERS[:irradiance]] = irradiance
+      @row[COLUMN_HEADERS[:irradiance]] = irradiance.to_f
     end
   
     def panel_data(key)
@@ -52,12 +52,16 @@ class PanelStats
       irradiance * panel_area
     end
 
+    def add_power_data!
+      set_power (current * voltage).round(2)
+      puts "Setting power score for #{panel_name} (#{power}/#{pmax})" if power > pmax
+      set_power_score ((power / pmax) * 100.0).round(1)
+      set_sun_score (irradiance / 10.0).round(1)
+    end
+
     def add_irradiance_data!
       set_normalized_irradiance (irradiance / 100.0).round(3)
-      set_power (current * voltage).round(2)
       set_efficiency ((power / irradiance_on_panel) * 100.00).round(2)
-      set_sun_score (irradiance / 10.0).round(1)
-      set_power_score ((power / pmax) * 100.0).round(1)
       set_efficiency_score (sun_score - power_score).round(1)
     end
   end
@@ -65,6 +69,7 @@ class PanelStats
   attr_reader :filename, :table, :irradiance_log, :multimeter_log
 
   def initialize(filename)
+    puts "Reading #{filename}"
     @filename = filename
     @multimeter_log = File.open(filename, "r") do |file|
       file.gets
@@ -74,8 +79,11 @@ class PanelStats
   end
 
   def new_log_headers
-    new_log_headers = irradiance_log ? table.headers + [COLUMN_HEADERS[:irradiance], COLUMN_HEADERS[:normalized_irradiance]] : table.headers
-    new_log_headers += [COLUMN_HEADERS[:power], COLUMN_HEADERS[:efficiency], COLUMN_HEADERS[:power_score], COLUMN_HEADERS[:sun_score], COLUMN_HEADERS[:efficiency_score]]
+    new_headers = table.headers.dup + [COLUMN_HEADERS[:power], COLUMN_HEADERS[:power_score], COLUMN_HEADERS[:sun_score]]
+    if irradiance_log
+      new_headers += [COLUMN_HEADERS[:irradiance], COLUMN_HEADERS[:normalized_irradiance], COLUMN_HEADERS[:efficiency], COLUMN_HEADERS[:efficiency_score]]
+    end
+    new_headers
   end
 
   def irradiance_log
@@ -93,7 +101,8 @@ class PanelStats
   end
 
   def irradiance_value_at_index(i)
-    irradiance_log[i] && irradiance_log[i].last
+    return unless irradiance_log && irradiance_log[i]
+    irradiance_log[i].last
   end
 
   def panel_name
@@ -101,24 +110,25 @@ class PanelStats
   end
 
   def write_results!
-    CSV.open(filename.sub("data", "output"), "w") do |collated_logs|
-      collated_logs << new_log_headers
+    csv_filename = filename.sub("data", "output")
+    table.each_with_index do |row, i|
+      calculator = Calculator.new(
+        row: row,
+        panel_name: panel_name, 
+        irradiance: irradiance_value_at_index(i) ||  "0.0"
+      )
+      calculator.add_power_data!
 
-      table.each_with_index do |row, i|
-        if irradiance_log
-          next unless irradiance_value_at_index(i)
-          calculator = Calculator.new(
-            row: row,
-            panel_name: panel_name, 
-            irradiance: irradiance_value_at_index(i).to_f
-          )
-          puts "Row before: #{calculator.row}"
-          calculator.add_irradiance_data!
-          puts "Row after:  #{calculator.row}"
-        end
-        row["Time"] = row["Time"].sub("0day", "")
-        collated_logs << row
+      if irradiance_log
+        next unless irradiance_value_at_index(i)
+        calculator.add_irradiance_data!
       end
+
+      row["Time"] = row["Time"].sub("0day", "")
+    end
+
+    CSV.open(csv_filename, "w", write_headers: true, headers: table.headers) do |collated_logs|
+      table.each { |row| collated_logs << row }
     end
   end
 end
