@@ -2,23 +2,59 @@ bigblue:
   area: 1.75
   weight: 1.23
   price: 60.00
+  pmax: 9
 foxelli:
   area: 1.01
   weight: 1.10
   price: 40.00
+  pmax: 9.25
 nekteck:
   area: 1.29
   weight: 1.12
   price: 40.00
+  pmax: 10
 xdragon:
   area: 1.07
   weight: 0.94
   price: 40.00
+  pmax: 7.5
 aeiusny:
   weight: 1.86
   area: 1.65
   price: 50
+  pmax: 10
 choetech:
   weight: 1.06
   area: 1.22
   price: 56.00
+  pmax: 8
+gznomad7:
+  weight: 1.0
+  area: 0.74
+  price: 80
+  pmax: 7
+ravpower:
+  weight: 1.0
+  area: 1.10
+  price: 50.00
+  pmax: 8
+renogy:
+  weight: 0.81
+  area: 0.74
+  price: 30.00
+  pmax: 10
+solarcamp:
+  weight: 0.59
+  area: 1.33
+  price: 70.00
+  pmax: 10
+rynotuff:
+  weight: 1.04
+  area: 1.2
+  pmax: 10
+  price: 45.00
+gznomad14:
+  weight: 1.8
+  area: 1.24
+  pmax: 12
+  price: 150.00
