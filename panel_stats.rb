@@ -14,7 +14,9 @@ class PanelStats
     power_score: "Power Score",
     efficiency_score: "Efficiency Score",
     current: "Current(A)",
-    voltage: "Voltage(V)"
+    voltage: "Voltage(V)",
+    watts_per_ounce: "Watts/oz",
+    normalized_energy_density: "cW/oz"
   }
   
   class Calculator
@@ -43,6 +45,10 @@ class PanelStats
     def panel_area
       panel_data(:area)
     end
+
+    def panel_weight
+      panel_data(:weight)
+    end
   
     def pmax
       panel_data(:pmax)
@@ -54,8 +60,9 @@ class PanelStats
 
     def add_power_data!
       set_power (current * voltage).round(2)
-      puts "Setting power score for #{panel_name} (#{power}/#{pmax})" if power > pmax
       set_power_score ((power / pmax) * 100.0).round(1)
+      set_watts_per_ounce (power / (panel_weight * 16)).round(2)
+      set_normalized_energy_density (watts_per_ounce * 10.00).round(2)
       set_sun_score (irradiance / 10.0).round(1)
     end
 
