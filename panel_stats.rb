@@ -62,7 +62,7 @@ class PanelStats
     def add_irradiance_data!
       set_normalized_irradiance (irradiance / 100.0).round(3)
       set_efficiency ((power / irradiance_on_panel) * 100.00).round(2)
-      set_efficiency_score (sun_score - power_score).round(1)
+      #set_efficiency_score (sun_score - power_score).round(1)
     end
   end
 
