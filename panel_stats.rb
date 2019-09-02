@@ -18,23 +18,22 @@ class PanelStats
   }
   
   class Calculator
-    attr_reader :row, :panel_name, :irradiance
+    attr_reader :row, :panel_name
 
     COLUMN_HEADERS.keys.each do |key|
       define_method key do
-        row[COLUMN_HEADERS[key]].to_f
+        row[COLUMN_HEADERS[key.to_sym]].to_f
       end
   
-      define_method "#{key}=" do |value|
-        puts "Setting #{key} to #{value}"
-        @row[COLUMN_HEADERS[key]] =  value
+      define_method "set_#{key}" do |value|
+        @row[COLUMN_HEADERS[key.to_sym]] = value
       end
     end
   
     def initialize(row:, panel_name:, irradiance:)
       @row = row
       @panel_name = panel_name
-      @irradiance = irradiance
+      @row[COLUMN_HEADERS[:irradiance]] = irradiance
     end
   
     def panel_data(key)
@@ -54,12 +53,12 @@ class PanelStats
     end
 
     def add_irradiance_data!
-      normalized_irradiance = (irradiance / 100.0).round(3)
-      power = (current * voltage).round(2)
-      efficiency = ((power / irradiance_on_panel) * 100.00).round(2)
-      sun_score = (irradiance / 10.0).round(1)
-      power_score = ((power / pmax) * 100.0).round(1)
-      efficiency_score = (sun_score - power_score).round(1)
+      set_normalized_irradiance (irradiance / 100.0).round(3)
+      set_power (current * voltage).round(2)
+      set_efficiency ((power / irradiance_on_panel) * 100.00).round(2)
+      set_sun_score (irradiance / 10.0).round(1)
+      set_power_score ((power / pmax) * 100.0).round(1)
+      set_efficiency_score (sun_score - power_score).round(1)
     end
   end
 
@@ -111,11 +110,11 @@ class PanelStats
           calculator = Calculator.new(
             row: row,
             panel_name: panel_name, 
-            irradiance: irradiance_value_at_index(i).to_i
+            irradiance: irradiance_value_at_index(i).to_f
           )
           puts "Row before: #{calculator.row}"
           calculator.add_irradiance_data!
-          puts "Row after: #{calculator.row}"
+          puts "Row after:  #{calculator.row}"
         end
         row["Time"] = row["Time"].sub("0day", "")
         collated_logs << row
