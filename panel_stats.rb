@@ -7,7 +7,7 @@ PANEL_DATA = YAML.load_file('./data/panel_stats.yml')
 class PanelStats
   COLUMN_HEADERS = {
     irradiance: "Irradiance(W/m2)",
-    normalized_irradiance: "Irradiance/100",
+    normalized_irradiance: "Sunlight Level",
     power: "Power(W)",
     efficiency: "Efficiency(%)",
     sun_score: "Sun Score",
@@ -60,15 +60,15 @@ class PanelStats
 
     def add_power_data!
       set_power (current * voltage).round(2)
-      set_power_score ((power / pmax) * 100.0).round(1)
-      set_watts_per_ounce (power / (panel_weight * 16)).round(2)
-      set_normalized_energy_density (watts_per_ounce * 10.00).round(2)
-      set_sun_score (irradiance / 10.0).round(1)
+      #set_power_score ((power / pmax) * 100.0).round(1)
+      #set_watts_per_ounce (power / (panel_weight * 16)).round(2)
+      #set_normalized_energy_density (watts_per_ounce * 10.00).round(2)
+      #set_sun_score (irradiance / 10.0).round(1)
     end
 
     def add_irradiance_data!
       set_normalized_irradiance (irradiance / 100.0).round(3)
-      set_efficiency ((power / irradiance_on_panel) * 100.00).round(2)
+      #set_efficiency ((power / irradiance_on_panel) * 100.00).round(2)
       #set_efficiency_score (sun_score - power_score).round(1)
     end
   end
@@ -83,14 +83,6 @@ class PanelStats
       file.read
     end
     @table = CSV.new(multimeter_log, headers: true).read
-  end
-
-  def new_log_headers
-    new_headers = table.headers.dup + [COLUMN_HEADERS[:power], COLUMN_HEADERS[:power_score], COLUMN_HEADERS[:sun_score]]
-    if irradiance_log
-      new_headers += [COLUMN_HEADERS[:irradiance], COLUMN_HEADERS[:normalized_irradiance], COLUMN_HEADERS[:efficiency], COLUMN_HEADERS[:efficiency_score]]
-    end
-    new_headers
   end
 
   def irradiance_log
