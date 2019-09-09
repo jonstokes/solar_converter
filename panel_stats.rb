@@ -73,11 +73,13 @@ class PanelStats
     end
   end
 
-  attr_reader :filename, :table, :irradiance_log, :multimeter_log
+  attr_reader :filename, :table, :irradiance_log, :multimeter_log, :opts
 
-  def initialize(filename)
-    puts "Reading #{filename}"
+  def initialize(filename, opts = {})
+    @opts = opts
     @filename = filename
+    
+    puts "Reading #{filename}"
     @multimeter_log = File.open(filename, "r") do |file|
       file.gets
       file.read
@@ -111,6 +113,7 @@ class PanelStats
   def write_results!
     csv_filename = filename.sub("data", "output")
     table.each_with_index do |row, i|
+      next if opts[:sample_rate] && opts[:sample_rate] % 10 != 0
       calculator = Calculator.new(
         row: row,
         panel_name: panel_name, 
