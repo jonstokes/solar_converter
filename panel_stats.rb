@@ -110,10 +110,17 @@ class PanelStats
     @panel_name ||= filename.split("/").last.split("-").first
   end
 
+  def sample_rate
+    opts[:sample_rate]
+  end
+
   def write_results!
     csv_filename = filename.sub("data", "output")
+    marked_row_length = nil
+
     table.each_with_index do |row, i|
-      next if opts[:sample_rate] && opts[:sample_rate] % 10 != 0
+      next if sample_rate && i % sample_rate != 0
+
       calculator = Calculator.new(
         row: row,
         panel_name: panel_name, 
@@ -127,10 +134,14 @@ class PanelStats
       end
 
       row["Time"] = row["Time"].sub("0day", "")
+      marked_row_length = row.length unless marked_row_length
     end
 
     CSV.open(csv_filename, "w", write_headers: true, headers: table.headers) do |collated_logs|
-      table.each { |row| collated_logs << row }
+      table.each do |row|
+        puts "Sample rate: #{sample_rate}. Row length #{row.length}. Max #{marked_row_length}" if filename[/\/data\/8/]
+        collated_logs << row unless row.length < marked_row_length
+      end
     end
   end
 end
