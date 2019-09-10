@@ -67,6 +67,7 @@ class PanelStats
     end
 
     def add_irradiance_data!
+      return unless irradiance && irradiance != "0.0"
       set_normalized_irradiance (irradiance / 100.0).round(3)
       #set_efficiency ((power / irradiance_on_panel) * 100.00).round(2)
       #set_efficiency_score (sun_score - power_score).round(1)
@@ -116,31 +117,29 @@ class PanelStats
 
   def write_results!
     csv_filename = filename.sub("data", "output")
-    marked_row_length = nil
+    irradiance_index = 0
 
     table.each_with_index do |row, i|
-      next if sample_rate && i % sample_rate != 0
+      next if sample_rate && (i % sample_rate != 0)
+
+      irradiance = irradiance_value_at_index(irradiance_index)
+      irradiance_index += 1
 
       calculator = Calculator.new(
         row: row,
         panel_name: panel_name, 
-        irradiance: irradiance_value_at_index(i) ||  "0.0"
+        irradiance: irradiance ||  "0.0"
       )
       calculator.add_power_data!
 
-      if irradiance_log
-        next unless irradiance_value_at_index(i)
-        calculator.add_irradiance_data!
+      if !irradiance_log || calculator.add_irradiance_data!
+        row["Time"] = row["Time"].sub("0day", "")
       end
-
-      row["Time"] = row["Time"].sub("0day", "")
-      marked_row_length = row.length unless marked_row_length
     end
 
     CSV.open(csv_filename, "w", write_headers: true, headers: table.headers) do |collated_logs|
       table.each do |row|
-        puts "Sample rate: #{sample_rate}. Row length #{row.length}. Max #{marked_row_length}" if filename[/\/data\/8/]
-        collated_logs << row unless row.length < marked_row_length
+        collated_logs << row unless row["Time"][/0day/]
       end
     end
   end
